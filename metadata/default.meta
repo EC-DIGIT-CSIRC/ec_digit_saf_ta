@@ -1,4 +1,3 @@
-[metadata]
-access = read : [ * ]
+[]
+access = read : [ * ], write : [ admin, power ]
 export = system
-owner = admin
