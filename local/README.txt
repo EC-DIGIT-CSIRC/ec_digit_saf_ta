@@ -1,1 +1,0 @@
-Read the README.md that you can find in https://github.com/EC-DIGIT-CSIRC/ec-digit-saf_ta
