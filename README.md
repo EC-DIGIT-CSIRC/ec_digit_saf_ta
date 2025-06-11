@@ -42,11 +42,11 @@ The scripted input attempts to be smart so that it keeps track of the already pr
 
 ## Usage
 
-The Addon comes with default configuration files. You will have to override the default configuration of [`inputs.conf`](default/inputs.conf) and [`ec-digit-saf_ta_settings.conf`](default/ec-digit-saf_ta_settings.conf).
+The Addon comes with default configuration files. You will have to override the default configuration of [`inputs.conf`](default/inputs.conf) and [`ec_digit_saf_ta_settings.conf`](default/ec_digit_saf_ta_settings.conf).
 
 - Copy those files to the `local` folder.
 - Edit `inputs.conf` so that the __monitor stanzas__ point to the proper folder path with SAF cases and the __host\_segment__ field points to the correct segment according to the configured path.
-- Edit `ec-digit-saf_ta_settings.conf` so that the path within the section `cases` points to the path where to find the `cases.json` file. By default, at the root of the SAF cases folder.
+- Edit `ec_digit_saf_ta_settings.conf` so that the path within the section `cases` points to the path where to find the `cases.json` file. By default, at the root of the SAF cases folder.
 
 You are ready to roll!
 
@@ -63,4 +63,4 @@ Feel free to report issues, start new discussions, or create pull requests in Gi
 # Licence
 
 This project is released under the European Public Licence
-https://commission.europa.eu/content/european-union-public-licence_en
+<https://commission.europa.eu/content/european-union-public-licence_en>

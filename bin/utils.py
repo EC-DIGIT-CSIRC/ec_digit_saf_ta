@@ -6,7 +6,7 @@
 from pathlib import Path
 from configparser import ConfigParser
 
-def get_config(config_file: str = 'ec-digit-saf_ta_settings.conf') -> ConfigParser:
+def get_config(config_file: str = 'ec_digit_saf_ta_settings.conf') -> ConfigParser:
     config = ConfigParser()
     # Local path first, then default path
     config_path = Path(__file__).parent.parent / 'local' / config_file
