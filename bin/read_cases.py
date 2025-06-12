@@ -5,21 +5,16 @@
 from datetime import datetime
 import json
 import logging
-import os
-import sys
 from pathlib import Path
 
-from utils import get_config
+from utils import get_config, get_logging_filehandler
 
 STATE_PATH = Path(__file__).parent.parent / 'local' / 'cases_state.json'
 
 # Configure logging
-SPLUNK_HOME = os.environ.get("SPLUNK_HOME", "/opt/splunk")
-LOG_FILE = Path(SPLUNK_HOME) / 'var' / 'log' / 'splunk' / 'ec_digit_saf_ta_read_cases.log'
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s %(levelname)s %(module)s %(message)s',
-    filename= str(LOG_FILE)
+    handlers=[get_logging_filehandler()]
 )
 
 def load_state() -> dict:
