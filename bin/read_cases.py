@@ -10,11 +10,16 @@ from pathlib import Path
 from utils import get_config, get_logging_filehandler
 
 STATE_PATH = Path(__file__).parent.parent / 'local' / 'cases_state.json'
+CONFIG = get_config()
 
 # Configure logging
+handler = get_logging_filehandler(
+    max_size=max(CONFIG.getint("logging", "max_size_mb", fallback=1), 1),  # Ensure at least 1 MB
+    max_files=max(CONFIG.getint("logging", "max_backup_files", fallback=2), 1) # Ensure at least 1 backup file
+)
 logging.basicConfig(
     level=logging.INFO,
-    handlers=[get_logging_filehandler()]
+    handlers=[handler]
 )
 
 def load_state() -> dict:
@@ -41,9 +46,8 @@ def save_state(state: dict) -> None:
 
 def main():
     processed_case_ids = load_state()  # dict: root -> set(case_id)
-    config = get_config()
     # Get the root path from config, default to 'cases'
-    root_path = Path(config.get("cases", "folder", fallback='/cases'))
+    root_path = Path(CONFIG.get("cases", "folder", fallback='/cases'))
     # Find all cases.json files recursively
     total = 0
     for cases_file in root_path.rglob("cases.json"):
