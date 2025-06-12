@@ -5,6 +5,7 @@
 from datetime import datetime
 import json
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -13,10 +14,12 @@ from utils import get_config
 STATE_PATH = Path(__file__).parent.parent / 'local' / 'cases_state.json'
 
 # Configure logging
+SPLUNK_HOME = os.environ.get("SPLUNK_HOME", "/opt/splunk")
+LOG_FILE = Path(SPLUNK_HOME) / 'var' / 'log' / 'splunk' / 'ec_digit_saf_ta_read_cases.log'
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s %(levelname)s %(module)s %(message)s',
-    stream=sys.stderr  # Splunk expects events on stdout, logs on stderr
+    filename= str(LOG_FILE)
 )
 
 def load_state() -> dict:
@@ -45,7 +48,7 @@ def main():
     processed_case_ids = load_state()  # dict: root -> set(case_id)
     config = get_config()
     # Get the root path from config, default to 'cases'
-    root_path = Path(config.get("cases", "path", fallback='/cases'))
+    root_path = Path(config.get("cases", "folder", fallback='/cases'))
     # Find all cases.json files recursively
     total = 0
     for cases_file in root_path.rglob("cases.json"):
