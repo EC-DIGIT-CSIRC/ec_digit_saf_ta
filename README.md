@@ -22,9 +22,9 @@ It maps the SAF artefacts to the following splunk fields:
 | Logs | logs| host_segment | filename | `digit:saf:logs:json` | Folder monitoring
 | Devices/Cases information | cases.json | case_id | path/to/cases.json | `digit:saf:cases:json` | Scripted
 
-It extracts the `case_id` from the path for the source types: `digit:saf:parseddata:json` and `digit:saf:logs:json`. So that you can correlate the information with `digit:saf:cases:json` either by using the `case_id` field or `host` field. Be aware that, due to `digit:saf:cases:json` source type comes from a scripted input the `host` field may also contain the hostname of the computer where the script executed.
+[It extracts](https://docs.splunk.com/Documentation/Splunk/9.4.2/Knowledge/Createandmaintainsearch-timefieldextractionsthroughconfigurationfiles) the `case_id` from the path for the source types: `digit:saf:parseddata:json` and `digit:saf:logs:json`. So that you can correlate the information with `digit:saf:cases:json` by using the `case_id` field. Be aware that, due to `digit:saf:cases:json` source type comes from a scripted input the `host` field will also contain the hostname of the computer (Forwarder) where the script executed.
 
-The scripted input attempts to be smart so that it keeps track of the already processed `case_id` by keeping a cache. If you encounter problems while ingesting cases, you may want to (1) take a look to the dedicated log file `ec_digit_saf_ta_read_cases.log` and, (2) (selectively) delete the cache (entries) that you will find in the `local` folder.
+The scripted input attempts to be smart so that it keeps track of the already processed `case_id` by keeping a cache. If you encounter problems while ingesting cases, you may want to (1) take a look to the dedicated log file `ec_digit_saf_ta_read_cases.log` and backups `ec_digit_saf_ta_read_cases.log.X` (where X = 1, ...) and, (2) (selectively) delete the cache (entries) that you will find in the `local` folder.
 
 ## Installation Instructions
 
