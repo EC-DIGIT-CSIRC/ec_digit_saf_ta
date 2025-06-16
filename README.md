@@ -46,7 +46,7 @@ The Addon comes with default configuration files. You will have to override the 
 
 - Copy those files to the `local` folder.
 - Edit `inputs.conf` so that the __monitor stanzas__ point to the proper folder path with SAF cases and the __host\_segment__ field points to the correct segment according to the configured path.
-- Edit `ec_digit_saf_ta_settings.conf` so that the path within the section `cases` points to the path where to find the `cases.json` file. By default, at the root of the SAF cases folder.
+- Edit `ec_digit_saf_ta_settings.conf` so that the path within the section `cases` points to the path where to find the `cases.json` file. By default, at the root of the SAF cases folder. __Note:__ You can also tune the `logging` configuration.
 
 You are ready to roll!
 

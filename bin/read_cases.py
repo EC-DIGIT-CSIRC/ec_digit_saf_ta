@@ -18,7 +18,7 @@ handler = get_logging_filehandler(
     max_files=max(CONFIG.getint("logging", "max_backup_files", fallback=2), 1) # Ensure at least 1 backup file
 )
 logging.basicConfig(
-    level=logging.INFO,
+    level=CONFIG.getint("logging", "level", fallback=logging.INFO),
     handlers=[handler]
 )
 
