@@ -47,7 +47,7 @@ def save_state(state: dict) -> None:
 def main():
     processed_case_ids = load_state()  # dict: root -> set(case_id)
     # Get the root path from config, default to 'cases'
-    root_path = Path(CONFIG.get("cases", "folder", fallback='/cases'))
+    root_path = Path(CONFIG.get("cases", "folder", fallback='/opt/sysdiagnose/cases'))
     # Find all cases.json files recursively
     total = 0
     for cases_file in root_path.rglob("cases.json"):

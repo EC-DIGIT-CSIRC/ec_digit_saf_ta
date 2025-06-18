@@ -45,8 +45,8 @@ The scripted input attempts to be smart so that it keeps track of the already pr
 The Addon comes with default configuration files. You will have to override the default configuration of [`inputs.conf`](default/inputs.conf) and [`ec_digit_saf_ta_settings.conf`](default/ec_digit_saf_ta_settings.conf).
 
 - Copy those files to the `local` folder.
-- Edit `inputs.conf` so that the __monitor stanzas__ point to the proper folder path with SAF cases (default points to `/cases`) and the __host\_segment__ field points to the correct segment according to the configured path.
-- Edit `ec_digit_saf_ta_settings.conf` so that the path within the section `cases` points to the path where to find the `cases.json` file. By default, at the root of the SAF cases folder (default value `/cases`). __Note:__ You can also tune the `logging` configuration.
+- Edit `inputs.conf` so that the __monitor stanzas__ point to the proper folder path with SAF cases (default points to `/opt/sysdiagnose/cases`) and the __host\_segment__ field points to the correct segment according to the configured path (default to third segment, basically `cases`).
+- Edit `ec_digit_saf_ta_settings.conf` so that the path within the section `cases` points to the path where to find the `cases.json` file. By default, at the root of the SAF cases folder (default value `/opt/sysdiagnose/cases`). __Note:__ You can also tune the `logging` configuration.
 - Make sure the environment variable [`$SPLUNK_HOME`](https://dev.splunk.com/enterprise/tutorials/quickstart_old/setsplunkhome/) exists and that points to the Splunk installation directory. Otherwise the scripted input will not work. If you *override* the scripted input in the local folder, the Add-on will still attempt to create the log files `ec_digit_saf_ta_read_cases.log.X` under the folder `/opt/splunk/var/log/splunk`, which if it does not exist and the user under which the Splunk instance does not have write privileges will fail to create.
 
 ```bash
