@@ -59,6 +59,27 @@ You are ready to roll!
 
 Feel free to report issues, start new discussions, or create pull requests in Github.
 
+A few tips and tricks to double check everything is ingested properly. Start with:
+
+```splunk
+index=_internal sourcetype=splunkd digit:saf*
+| stats count by log_level, component
+```
+
+You will see the warnings and errors, and from which component (DateParserVerbose, LineBreakingProcessor, etc.). That may help you to tune some properties.
+
+It is worth mentioning `LineBreakingProcessor` because there are some data sources (`logarchive` is one of them) that contain very long lines. This SPL will help you to identify truncation problems.
+
+```splunk
+index=_internal sourcetype=splunkd digit:saf*   component=LineBreakingProcessor
+| rex field=event_message ">=\s*(?<data_length>\d+)"
+| stats max(data_length) as data_length_max, min(data_length) as data_length_min, avg(data_length) as data_length_avg by data_source
+| sort - data_length_max, data_source
+
+OR
+| top data_length_max, data_source
+```
+
 ## References
 
 - [Sysdiagnose Analysis Framework (SAF)](https://github.com/EC-DIGIT-CSIRC/sysdiagnose)
