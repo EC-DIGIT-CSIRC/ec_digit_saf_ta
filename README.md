@@ -38,7 +38,7 @@ The scripted input attempts to be smart so that it keeps track of the already pr
 | Search head   | No       | No      | It does not include any dashboard.
 | Indexer       | Yes       | Optional       | Not required if you use heavy forwarders to collect data. Required if you use universal forwarders to collect data.
 | Heavy forwarder     | Yes       | See comments       | This add-on supports heavy forwarder.
-| Universal forwarder | Yes       | Conditional       | This add-on needs the host to have Python installed or disable the scripted input.
+| Universal forwarder | Yes       | Conditional       | This add-on needs the host to have Python installed and be invoked via an OS script or disable the scripted input.
 
 ## Usage
 
