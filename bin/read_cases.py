@@ -37,6 +37,7 @@ def load_state() -> dict:
 
 def save_state(state: dict) -> None:
     """Save the state of processed case IDs per cases folder to a JSON file."""
+    STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
     try:
         # Convert sets to lists for JSON serialization
         with open(STATE_PATH, "w") as f:
