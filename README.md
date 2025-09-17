@@ -80,6 +80,14 @@ OR
 | top data_length_max, data_source
 ```
 
+### FAQ
+Q: Splunk complains about latency issues when ingesting data
+
+A: This is likely a false positive as explained in this [article](https://community.splunk.com/t5/All-Apps-and-Add-ons/How-can-I-view-the-indexing-latency-for-incoming-events-in-real/m-p/47893) : 
+The theoretical indexing latency can be calculated by subtracting the extracted time stamp (_time) from the time at which the event was indexed (_indextime). 
+This figure will of course be inaccurate when Splunk indexes historic logs. Negative latencies, if observed, usually indicate a system clock difference between the log writers and the indexer.
+
+
 ## References
 
 - [Sysdiagnose Analysis Framework (SAF)](https://github.com/EC-DIGIT-CSIRC/sysdiagnose)
