@@ -81,10 +81,24 @@ OR
 ```
 
 ### FAQ
-Q: Splunk complains about latency issues when ingesting data
 
-A: This is likely a false positive as explained in this [article](https://community.splunk.com/t5/All-Apps-and-Add-ons/How-can-I-view-the-indexing-latency-for-incoming-events-in-real/m-p/47893) : 
-The theoretical indexing latency can be calculated by subtracting the extracted time stamp (_time) from the time at which the event was indexed (_indextime). 
+#### Splunk complains about latency issues when ingesting data.
+
+__Warning message__
+
+```
+Forwarder Ingestion Latency
+
+Root Cause(s):
+
+Indicator 'ingestion_latency_lag_sec' exceeded configured value. The observed value is XYZ. Message from GUID:IP:PORT
+```
+
+__Answer__
+
+This is likely a false positive as explained in this [article](https://community.splunk.com/t5/All-Apps-and-Add-ons/How-can-I-view-the-indexing-latency-for-incoming-events-in-real/m-p/47893) :
+The theoretical indexing latency can be calculated by subtracting the extracted time stamp (_time) from the time at which the event was indexed (_indextime).
+
 This figure will of course be inaccurate when Splunk indexes historic logs. Negative latencies, if observed, usually indicate a system clock difference between the log writers and the indexer.
 
 
