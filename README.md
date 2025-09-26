@@ -35,7 +35,7 @@ The scripted input attempts to be smart so that it keeps track of the already pr
 
 | Instance type | Supported | Required | Description
 |---------------|-----------|----------|------------
-| Search head   | No       | No      | It does not include any dashboard.
+| Search head   | Yes       | Yes      | This add-on provides some search-time field extraction.
 | Indexer       | Yes       | Optional       | Not required if you use heavy forwarders to collect data. Required if you use universal forwarders to collect data.
 | Heavy forwarder     | Yes       | See comments       | This add-on supports heavy forwarder.
 | Universal forwarder | Yes       | Conditional       | This add-on needs the host to have Python installed and wrap the python scripted input in an OS script and declare that new (OS script based) scripted input.
