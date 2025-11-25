@@ -20,11 +20,20 @@ It maps the SAF artefacts to the following splunk fields:
 |---|---|---|---|---|---
 | Parsed data | parsed_data | host_segment | filename | `digit:saf:parseddata:json` | Folder monitoring
 | Logs | logs| host_segment | filename | `digit:saf:logs:json` | Folder monitoring
-| Devices/Cases information | cases.json | case_id | path/to/cases.json | `digit:saf:cases:json` | Scripted
+| Devices/Cases information | cases.json | serial_number | path/to/cases.json | `digit:saf:cases:json` | Scripted
 
 [It extracts](https://docs.splunk.com/Documentation/Splunk/9.4.2/Knowledge/Createandmaintainsearch-timefieldextractionsthroughconfigurationfiles) the `case_id` from the path for the source types: `digit:saf:parseddata:json` and `digit:saf:logs:json`. So that you can correlate the information with `digit:saf:cases:json` by using the `case_id` field. Be aware that, due to `digit:saf:cases:json` source type comes from a scripted input the `host` field will also contain the hostname of the computer (Forwarder) where the script executed.
 
-The scripted input attempts to be smart so that it keeps track of the already processed `case_id` by keeping a cache. If you encounter problems while ingesting cases, you may want to (1) take a look to the dedicated log file `ec_digit_saf_ta_read_cases.log` and backups `ec_digit_saf_ta_read_cases.log.X` (where X = 1, ...) and, (2) (selectively) delete the cache (entries) that you will find in the `local` folder.
+The scripted input attempts to be smart so that it keeps track of the already processed `case_id` by keeping a cache as json dict, where the key belongs to the serial number of the device and the value is the list of processed case id for that serial number. Example:
+
+```json
+{
+    "SERIAL1" : ["SERIAL1_20251125_091003", "SERIAL1_20251123_091003"],
+    "SERIAL2" : ["SERIAL2_20251125_091003"]
+}
+```
+
+If you encounter problems while ingesting cases, you may want to (1) take a look to the dedicated log file `ec_digit_saf_ta_read_cases.log` and backups `ec_digit_saf_ta_read_cases.log.X` (where X = 1, ...) and, (2) (selectively) delete the cache (entries) that you will find in the `local` folder.
 
 ## Installation Instructions
 
