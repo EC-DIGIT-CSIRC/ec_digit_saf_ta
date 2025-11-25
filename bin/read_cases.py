@@ -53,13 +53,14 @@ def main():
     total = 0
     for cases_file in root_path.rglob("cases.json"):
         logging.info(f"Processing cases from {cases_file}")
-        root = cases_file.parent.name
         try:
             with open(cases_file, "r") as f:
                 cases = json.load(f)
-                root_cases = processed_case_ids.get(root, set())
-                cached_root_cases = len(root_cases)
+                stats = {}
                 for case_id, event in cases.items():
+                    root = event['serial_number']
+                    stats[root] = stats.get(root, 0)
+                    root_cases = processed_case_ids.get(root, set())
                     if case_id in root_cases:
                         logging.warning(f"Skipping already processed case id: {case_id} for {root}")
                         continue
@@ -69,11 +70,14 @@ def main():
                     event['case_id'] = case_id
                     event['source'] = cases_file.as_posix()
                     print(json.dumps(event))
+                    # Mark it as processed
                     root_cases.add(case_id)
-                processed_case_ids[root] = root_cases
-                logging.info(
-                    f"Processed {len(cases)} cases for {root}, "
-                    f"newly added {len(root_cases) - cached_root_cases} cases.")
+                    processed_case_ids[root] = root_cases
+                    stats[root] += 1
+                # Logging stats
+                for k, v in stats.items():
+                    msg = f"New {v} cases added to {k}" if v > 0 else f"No new cases added to {k}"
+                    logging.info(msg)
             total += 1
         except Exception as e:
             logging.error(f"Failed to process cases file {cases_file}: {e}")
