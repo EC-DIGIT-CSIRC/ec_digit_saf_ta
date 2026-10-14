@@ -22,6 +22,18 @@ It maps the SAF artefacts to the following splunk fields:
 | Logs | logs| host_segment | filename | `digit:saf:logs:json` | Folder monitoring
 | Devices/Cases information | cases.json | serial_number | path/to/cases.json | `digit:saf:cases:json` | Scripted
 
+### Index-time fields (`digit:saf:parseddata:json`)
+
+To keep searches responsive over large modules (e.g. `logarchive`), the Addon extracts a selected set of high-value fields at **index time** for the `digit:saf:parseddata:json` source type only. These fields are stored in the index and read directly, avoiding a raw-event JSON scan. `KV_MODE = json` is kept for the long tail of remaining `data.*` fields.
+
+Indexed fields (12): `module`, `case_id`, `timestamp_desc`, `data.event_type`, `data.log_type`, `data.euid`, `data.boot_uuid`, `data.process`, `data.pid`, `data.subsystem`, `data.category`, `data.library`.
+
+Notes:
+
+- **Filtering** on an indexed field is faster transparently (e.g. `data.process=mussel`). **Aggregating** fast requires `| tstats` (e.g. `| tstats count by data.process`); a `search ... | stats` still scans raw events. Trailing wildcards (`keyword*`) use the index; leading wildcards (`*keyword`) do not.
+- Index-time fields apply only to data indexed **after** this config is in place. To benefit on existing cases, perform a one-time clean + reingest. New cases get the fields automatically.
+- **Instance-wide scope:** `fields.conf` (`INDEXED = true`) is keyed by field name, not by source type, so it applies across the whole Splunk instance. Any other data on the same instance that uses one of these field names (e.g. `module`, `case_id`, `data.process`) will have its search-time extraction for that field suppressed, which can make it appear empty. Confirm these names are not used elsewhere, or rename the indexed fields to a TA-specific prefix.
+
 [It extracts](https://docs.splunk.com/Documentation/Splunk/9.4.2/Knowledge/Createandmaintainsearch-timefieldextractionsthroughconfigurationfiles) the `case_id` from the path for the source types: `digit:saf:parseddata:json` and `digit:saf:logs:json`. So that you can correlate the information with `digit:saf:cases:json` by using the `case_id` field. Be aware that, due to `digit:saf:cases:json` source type comes from a scripted input the `host` field will also contain the hostname of the computer (Forwarder) where the script executed.
 
 The scripted input attempts to be smart so that it keeps track of the already processed `case_id` by keeping a cache as json dict, where the key belongs to the serial number of the device and the value is the list of processed case id for that serial number. Example:
