@@ -31,6 +31,7 @@ def get_config(config_file: str = 'ec_digit_saf_ta_settings.conf') -> ConfigPars
             raise FileNotFoundError(f"Configuration file {config_file} not found.")
     return config
 
+
 def get_logging_filehandler(log_filename: str = 'ec_digit_saf_ta_read_cases.log',
                             max_size: int = 1, max_files: int = 2) -> RotatingFileHandler:
     """Create a rotating file handler for logging.
@@ -51,3 +52,30 @@ def get_logging_filehandler(log_filename: str = 'ec_digit_saf_ta_read_cases.log'
     handler.setFormatter(Formatter('%(asctime)s %(levelname)s %(module)s %(message)s'))
 
     return handler
+
+
+def normalize_tags(tags: list) -> list:
+    """Normalize a tags list into a canonical, comparable form.
+
+    The cases.json file is loaded as a JSON object, so ``tags`` is already a
+    list of strings. Normalization trims whitespace, drops empties, lowercases
+    (tags are case-insensitive), de-duplicates, and sorts ascending. This makes
+    reordering, duplication, and case changes count as no change.
+
+    Args:
+        tags: The tags value from a case (a list of tag strings). Callers are
+              expected to pass a list; use ``[]`` for missing tags.
+    Returns:
+        list: Canonical, sorted, lowercased, de-duplicated list of tag strings.
+              Empty list on empty input.
+    """
+    if not tags:
+        return []
+
+    canonical = set()
+    for tag in tags:
+        tag = str(tag).strip().lower()
+        if tag:
+            canonical.add(tag)
+
+    return sorted(canonical)
