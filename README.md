@@ -17,14 +17,17 @@ This Addon maps all inputs to the index `digit_sysdiagnose` and all events (from
 It maps the SAF artefacts to the following splunk fields:
 
 | SAF artefact | SAF folder/file | host | source | sourcetype | input type
-|---|---|---|---|---|---
+| --- | --- | --- | --- |---|---
 | Parsed data | parsed_data | host_segment | filename | `digit:saf:parseddata:json` | Folder monitoring
 | Logs | logs| host_segment | filename | `digit:saf:logs:json` | Folder monitoring
 | Devices/Cases information | cases.json | serial_number | path/to/cases.json | `digit:saf:cases:json` | Scripted
+| Case tag changes over time | path/to/cases.json | serial_number | path/to/cases.json | `digit:saf:cases:tags:json` | Scripted
 
-[It extracts](https://docs.splunk.com/Documentation/Splunk/9.4.2/Knowledge/Createandmaintainsearch-timefieldextractionsthroughconfigurationfiles) the `case_id` from the path for the source types: `digit:saf:parseddata:json` and `digit:saf:logs:json`. So that you can correlate the information with `digit:saf:cases:json` by using the `case_id` field. Be aware that, due to `digit:saf:cases:json` source type comes from a scripted input the `host` field will also contain the hostname of the computer (Forwarder) where the script executed.
+[It extracts](https://docs.splunk.com/Documentation/Splunk/9.4.2/Knowledge/Createandmaintainsearch-timefieldextractionsthroughconfigurationfiles) the `case_id` from the path for the source types: `digit:saf:parseddata:json` and `digit:saf:logs:json`. So that you can correlate the information with `digit:saf:cases:json` by using the `case_id` field. Be aware that, due to `digit:saf:cases:json` and `digit:saf:cases:tags:json` source types come from a scripted input the `host` field will also contain the hostname of the computer (Forwarder) where the script executed.
 
-The scripted input attempts to be smart so that it keeps track of the already processed `case_id` by keeping a cache as json dict, where the key belongs to the serial number of the device and the value is the list of processed case id for that serial number. Example:
+### Cases
+
+The scripted input (`bin/read_cases.py`, source type `digit:saf:cases:json`) attempts to be smart so that it keeps track of the already processed `case_id` by keeping a cache as json dict (`local/cases_state.json`), where the key belongs to the serial number of the device and the value is the list of processed case id for that serial number. Example:
 
 ```json
 {
@@ -33,7 +36,26 @@ The scripted input attempts to be smart so that it keeps track of the already pr
 }
 ```
 
+Deleting the cache re-emits a baseline for every current case on the next run
+
 If you encounter problems while ingesting cases, you may want to (1) take a look to the dedicated log file `ec_digit_saf_ta_read_cases.log` and backups `ec_digit_saf_ta_read_cases.log.X` (where X = 1, ...) and, (2) (selectively) delete the cache (entries) that you will find in the `local` folder.
+
+### Tracking case tags over time
+
+Case tags in `cases.json` are mutable: operators add, change, or clear them over a case's life, and the SAF rewrites the file in place. A second scripted input (`bin/read_case_tags.py`, source type `digit:saf:cases:tags:json`) records how each case's tags evolve as a stream of small, time-stamped events, without disturbing the case ingestion described above.
+
+On every run it re-examines all cases and emits a `tags_changed` event whenever a case's tag set changes. The first time a case is seen with non-empty tags, a baseline event is emitted; a case first seen with no tags produces no event until a tag is added. Each event carries the current `tags`, the `tags_added`/`tags_removed` since the previous state, and the `previous_tags`.
+
+Two points worth understanding about tag semantics:
+
+- Tags are treated as __case-insensitive__ and __order-independent__: reordering, duplicating, or changing the case of tags is not a change. Emitted tags are canonical (trimmed, lowercased, de-duplicated, sorted).
+- The `tags` field on a `digit:saf:cases:json` event is a __snapshot taken at first ingestion__ and is not updated afterwards. For the current, evolving tag set, use the `digit:saf:cases:tags:json` stream (the latest event is the current truth).
+
+Tag events are stamped at __detection time__ (when the change is observed), because `cases.json` carries no per-change timestamp.
+
+The input keeps its own cache (`local/tags_state.json`, structured as `serial_number -> {case_id: {"tags": [...]}}`) and writes to its own log file `ec_digit_saf_ta_read_case_tags.log` (and backups `.X`).
+
+Deleting the cache re-emits a baseline for every current case on the next run without affecting case ingestion.
 
 ## Installation Instructions
 
@@ -91,7 +113,7 @@ OR
 
 ### FAQ
 
-#### Splunk complains about latency issues when ingesting data.
+#### Splunk complains about latency issues when ingesting data
 
 __Warning message__
 
@@ -110,6 +132,18 @@ The theoretical indexing latency can be calculated by subtracting the extracted 
 
 This figure will of course be inaccurate when Splunk indexes historic logs. Negative latencies, if observed, usually indicate a system clock difference between the log writers and the indexer.
 
+#### Splunk loses events
+
+You may silently lose some events/sources to arrive to your Splunk indexer. You may notice gaps in your dashboards or less events.
+
+__Answer__
+
+A plausible reason is that you installed this Splunk TA in a Splunk Universal Forwarder and the forwarder hits the [thruput limits](https://help.splunk.com/en/splunk-enterprise/administer/admin-manual/10.2/configuration-file-reference/10.2.0-configuration-file-reference/limits.conf#thruput-0). By default, a Splunk Universal Forwarder has the `maxKBps` setting limited to 256 KBps.
+
+Since the forwarder needs to deal with large files produced by [Sysdiagnose Analysis Framework (SAF)](https://github.com/EC-DIGIT-CSIRC/sysdiagnose), those files will keep busy the ingestion pipeline for very long time. Therefore, you should change the thruput limit and enable parallel ingestion pipeline as explained in here:
+
+- <https://splunk.my.site.com/customer/s/article/Data-is-coming-intermittently-from-the-Universal-Forwarders-UF>
+- <https://help.splunk.com/en/splunk-enterprise/administer/manage-indexers-and-indexer-clusters/9.3/manage-indexes/manage-pipeline-sets-for-index-parallelization#ariaid-title7>
 
 ## References
 
