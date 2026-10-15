@@ -23,11 +23,13 @@ It maps the SAF artefacts to the following splunk fields:
 | Devices/Cases information | cases.json | serial_number | path/to/cases.json | `digit:saf:cases:json` | Scripted
 | Case tag changes over time | path/to/cases.json | serial_number | path/to/cases.json | `digit:saf:cases:tags:json` | Scripted
 
+[It extracts](https://docs.splunk.com/Documentation/Splunk/9.4.2/Knowledge/Createandmaintainsearch-timefieldextractionsthroughconfigurationfiles) at search time the `case_id` from the path for the source types: `digit:saf:parseddata:json` and `digit:saf:logs:json`. So that you can correlate the information with `digit:saf:cases:json` by using the `case_id` field. Be aware that, due to `digit:saf:cases:json` and `digit:saf:cases:tags:json` source types come from a scripted input the `host` field will also contain the hostname of the computer (Forwarder) where the script executed.
+
 ### Index-time fields (`digit:saf:parseddata:json`)
 
-To keep searches responsive over large modules (e.g. `logarchive`), the Addon extracts a selected set of high-value fields at **index time** for the `digit:saf:parseddata:json` source type only. These fields are stored in the index and read directly, avoiding a raw-event JSON scan. `KV_MODE = json` is kept for the long tail of remaining `data.*` fields.
+To keep searches responsive over large modules (e.g. `logarchive`), the Addon extracts a selected set of high-value fields at **index time** for the `digit:saf:parseddata:json` source type only. These fields are stored in the index and and bring a massive performance gain when searching.
 
-The index-time fields are prefixed with `saf_idx_` (underscores only) so their names are unique, valid as indexed field keys, and never collide with the search-time `KV_MODE = json` fields. The original (unprefixed, dotted) names remain available at search time via `KV_MODE = json`. For a given field you therefore have two names: use the `saf_idx_` name for fast filtering and `| tstats`, and the plain name (e.g. `data.process`) for everything else.
+The index-time fields are prefixed with `saf_idx_` (underscores only) so their names are unique, valid as indexed field keys, and never collide with the search-time `KV_MODE = json` fields. The original (unprefixed, dotted) names remain available at search time via `KV_MODE = json`, but don't benefit from the speed. For a given field you therefore have two names: use the `saf_idx_` name for fast filtering and `| tstats`, and the plain name (e.g. `data.process`) for everything else.
 
 Indexed fields (12): `saf_idx_module`, `saf_idx_case_id`, `saf_idx_timestamp_desc`, `saf_idx_data_event_type`, `saf_idx_data_log_type`, `saf_idx_data_euid`, `saf_idx_data_boot_uuid`, `saf_idx_data_process`, `saf_idx_data_pid`, `saf_idx_data_subsystem`, `saf_idx_data_category`, `saf_idx_data_library`.
 
@@ -37,7 +39,7 @@ Notes:
 - Index-time fields apply only to data indexed **after** this config is in place. To benefit on existing cases, perform a one-time clean + reingest. New cases get the fields automatically.
 - **Scope:** because the indexed names carry the `saf_idx_` prefix, they are unique to this TA. `fields.conf` (`INDEXED = true`) applies only to these `saf_idx_*` names, so it does not affect the plain `KV_MODE = json` fields or any unrelated data on the same instance.
 
-[It extracts](https://docs.splunk.com/Documentation/Splunk/9.4.2/Knowledge/Createandmaintainsearch-timefieldextractionsthroughconfigurationfiles) the `case_id` from the path for the source types: `digit:saf:parseddata:json` and `digit:saf:logs:json`. So that you can correlate the information with `digit:saf:cases:json` by using the `case_id` field. Be aware that, due to `digit:saf:cases:json` and `digit:saf:cases:tags:json` source types come from a scripted input the `host` field will also contain the hostname of the computer (Forwarder) where the script executed.
+
 
 ### Cases
 
